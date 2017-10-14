@@ -1,0 +1,9 @@
+.vscode/launch.json
+.vscode/tasks.json
+obj/blockchain_parser.csproj.nuget.cache
+obj/blockchain_parser.csproj.nuget.g.props
+obj/blockchain_parser.csproj.nuget.g.targets
+obj/project.assets.json
+obj/Debug/netcoreapp2.0/blockchain_parser.AssemblyInfo.cs
+obj/Debug/netcoreapp2.0/blockchain_parser.AssemblyInfoInputs.cache
+obj/Debug/netcoreapp2.0/blockchain_parser.csproj.CoreCompileInputs.cache
