@@ -26,3 +26,6 @@ obj/Release/netcoreapp2.0/blockchain_parser.AssemblyInfo.cs
 obj/Release/netcoreapp2.0/blockchain_parser.AssemblyInfoInputs.cache
 obj/Release/netcoreapp2.0/blockchain_parser.csproj.CoreCompileInputs.cache
 obj/Release/netcoreapp2.0/blockchain_parser.csproj.FileListAbsolute.txt
+bin/Release/netcoreapp2.0/appsettings.json
+run.sh
+log.txt
