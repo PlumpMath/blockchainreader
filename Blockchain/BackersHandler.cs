@@ -12,7 +12,7 @@ namespace blockchain_parser.Blockchain
         public BackersHandler(){}
 
         public void processBackersFromTransactions(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
-            Print("transactions: " + transactions.Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
+            Print("transactions: " + transactions.Values.ToList().SelectMany(x => x).ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
             var projects_helper = new LoansHelper();
             var bids_helper = new LoanBidsHelper();
             var all_bids = new List<LoanBids>();
