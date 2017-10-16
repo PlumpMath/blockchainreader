@@ -60,6 +60,12 @@ namespace blockchain_parser.Blockchain.Ethereum
             int total_count = 0;
 
             foreach(JToken transaction in transactions){
+                
+                if(transaction.Type == JTokenType.Object && isTypeValues(JTokenType.String, transaction["blockNumber"])){
+                    var bn = Start.HexToULong((string)transaction["blockNumber"]);
+                    block_number = (bn.HasValue) ? bn.Value : 0;
+                }
+
                 if(transaction.Type != JTokenType.Object ||
                  !isTypeValues(JTokenType.String, 
                  transaction["blockNumber"], 
@@ -73,8 +79,6 @@ namespace blockchain_parser.Blockchain.Ethereum
                     continue;
                  }
 
-                var bn = Start.HexToULong((string)transaction["blockNumber"]);
-                block_number = (bn.HasValue) ? bn.Value : 0;
                 if(count > AppConfig.MaxTransactionPerSqlQuery)
                 {
                    onTransactionsTo(processing_transactions_to, addresses, block_number);
