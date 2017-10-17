@@ -220,6 +220,14 @@ namespace blockchain_parser.Model
                     .IsRequired()
                     .HasColumnName("block_number")
                     .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.From)
+                    .IsRequired()
+                    .HasColumnName("from");
+
+                entity.Property(e => e.To)
+                    .IsRequired()
+                    .HasColumnName("to");
             });
 
             modelBuilder.Entity<Loans>(entity =>

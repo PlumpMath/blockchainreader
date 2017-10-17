@@ -19,5 +19,7 @@ namespace blockchain_parser.Model
         public long? RefId { get; set; }
         public string Remarks { get; set; }
         public long BlockNumber { get; set; }
+        public string From { get; set; }
+        public string To { get; set; }
     }
 }
