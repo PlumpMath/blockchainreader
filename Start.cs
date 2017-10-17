@@ -33,7 +33,9 @@ namespace blockchain_parser
 
         private static string FormatHex(string hex) {
             if(hex.Length % 2 != 0)
-                return "0"+hex;
+                hex = ("0" + hex);
+            if(hex.Length > 4 && hex.Length % 4 != 0)
+                hex = ("00" + hex);
             return hex;
         }
 
@@ -53,7 +55,8 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.0.2");
+
+           Print("*Blockchain Parser* version 0.1.0.3");
            var bids_helper = new LoanBidsHelper();
            var latest_block = bids_helper.getLatestBlock();
            

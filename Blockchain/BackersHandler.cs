@@ -83,9 +83,18 @@ namespace blockchain_parser.Blockchain
 
         private LoanBids CreateBid(int loan_id, long? ref_id, int? investor_id, Transaction transaction, ulong block_number) {
             var bid = new LoanBids();
-            var amount_int = BigInteger.Parse(Start.PrepareHex(transaction.value), NumberStyles.HexNumber);
-            var amount = (decimal)amount_int;
-            amount = amount / 1000000000000000000m;
+            var hex = Start.PrepareHex(transaction.value);
+            var amount_int = BigInteger.Parse("00"+hex, NumberStyles.HexNumber);
+            bool contracted = false;
+            if(amount_int.ToString().Length > 18){
+                amount_int = BigInteger.Divide(amount_int, BigInteger.Parse("10000000000"));
+                contracted = true;
+            }
+            decimal amount = (hex.Length > 32) ? 0 : (decimal)amount_int;
+            if(amount > 0)
+                amount = amount / ((contracted) ? 100000000m : 1000000000000000000m);
+            else 
+                amount = 0;
 
             bid.AcceptedAmount = amount;
             bid.BidAmount = amount;
