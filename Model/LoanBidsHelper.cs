@@ -17,5 +17,16 @@ namespace blockchain_parser.Model
         public void PopulateBackersFundingTransactions(List<LoanBids> funding_transactions) {
             Create(db => db.LoanBids, funding_transactions);
         }
+
+        public void CreateOrUpdateLastBlock(LoanBids block_transactions) {
+            var b = block_transactions;
+          
+            Update(db => db.LoanBids, condition => condition.BidStatus == b.BidStatus, update => {
+                    if(update == null)
+                         Create(db => db.LoanBids, b);
+                    else
+                        update.BlockNumber = b.BlockNumber;
+            });
+        }
     }
 }

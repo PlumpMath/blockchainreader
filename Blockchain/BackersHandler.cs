@@ -12,7 +12,8 @@ namespace blockchain_parser.Blockchain
         public BackersHandler(){}
 
         public void processBackersFromTransactions(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
-            Print("transactions: " + transactions.Values.ToList().SelectMany(x => x).ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
+            var all_transactions = transactions.Values.ToList().SelectMany(x => x).ToList();
+            Print("transactions: " + all_transactions.ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
             var projects_helper = new LoansHelper();
             var bids_helper = new LoanBidsHelper();
             var all_bids = new List<LoanBids>();
@@ -22,6 +23,8 @@ namespace blockchain_parser.Blockchain
             int backers_counter = 0;
             if(projects == null || projects.Count == 0){
                 Print("no any backer transactions");
+                if(all_transactions.Count > 0)
+                    SaveLastBlockNumber(all_transactions[0], block_number);
                 return;
             }
 
@@ -81,7 +84,15 @@ namespace blockchain_parser.Blockchain
             return no_backer_bids.Values.ToList().SelectMany(x => x).ToList();;
         }
 
-        private LoanBids CreateBid(int loan_id, long? ref_id, int? investor_id, Transaction transaction, ulong block_number) {
+        private void SaveLastBlockNumber(Transaction transaction, ulong block_number){
+            var bids_helper = new LoanBidsHelper();
+            var bid = CreateBid(0, null, null, transaction, block_number, -1);
+            bids_helper.CreateOrUpdateLastBlock(bid);
+            
+        }
+
+        private LoanBids CreateBid(int loan_id, long? ref_id, int? investor_id, Transaction transaction, ulong block_number,
+            int? status = null) {
             var bid = new LoanBids();
             var hex = Start.PrepareHex(transaction.value);
             var amount_int = BigInteger.Parse("00"+hex, NumberStyles.HexNumber);
@@ -99,7 +110,10 @@ namespace blockchain_parser.Blockchain
             bid.AcceptedAmount = amount;
             bid.BidAmount = amount;
             bid.BidDatetime = DateTime.UtcNow;
-            bid.BidStatus = (investor_id.HasValue) ? 1 : 0;
+            if(status.HasValue)
+                bid.BidStatus = status.Value;
+            else
+                bid.BidStatus = (investor_id.HasValue) ? 1 : 0;
             bid.LoanId = loan_id;
             bid.InvestorId = investor_id;
             bid.ProcessDate = DateTime.UtcNow;
