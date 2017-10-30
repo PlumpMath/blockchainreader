@@ -30,10 +30,12 @@ namespace blockchain_parser.Blockchain.Ethereum
 
             webSocket.onError = (error) => {
                 Logger.LogStatus(ConsoleColor.Red, AppConfig.WebsocketNodeUrl + " " + error.Message);
+                Environment.Exit(1);
             };
 
             webSocket.onClose = () => {
                 Logger.LogStatus(ConsoleColor.Red, "Connection with " + AppConfig.WebsocketNodeUrl + " has been closed");
+                Environment.Exit(1);
             };
 
             webSocket.Connect(AppConfig.WebsocketNodeUrl);
@@ -52,6 +54,7 @@ namespace blockchain_parser.Blockchain.Ethereum
                     block_response = JObject.Parse(response);
                 } catch(Exception ex){
                     Logger.LogStatus(ConsoleColor.Red, "ERROR: " + ex);
+                    Environment.Exit(1);
                     return null;
                 } 
              }
@@ -70,6 +73,7 @@ namespace blockchain_parser.Blockchain.Ethereum
                     block_response = JObject.Parse(response);
                 } catch(Exception ex){
                     Logger.LogStatus(ConsoleColor.Red, "ERROR: " + ex);
+                    Environment.Exit(1);
                     return null;
                 } 
              }

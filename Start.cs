@@ -3,6 +3,7 @@ using blockchain_parser.Blockchain.Ethereum;
 using blockchain_parser.Blockchain;
 using System.Collections.Generic;
 using blockchain_parser.Model;
+using System.Threading;
 
 namespace blockchain_parser
 {
@@ -56,7 +57,7 @@ namespace blockchain_parser
         static void Main(string[] args)
         {
 
-           Print("*Blockchain Parser* version 0.1.0.4");
+           Print("*Blockchain Parser* version 0.1.0.6");
            var bids_helper = new LoanBidsHelper();
            var latest_block = bids_helper.getLatestBlock();
            
@@ -83,7 +84,12 @@ namespace blockchain_parser
            });
 
             Print("Started service for " + AppConfig.WebsocketNodeUrl + " node listening...");
-            Console.ReadKey();
+            while (true)
+            {
+                Thread.Sleep(1000);
+                if (args.Length > 0)
+                    break;
+            }
             Ethereum.StopListenNewBlocks();
         }
     }
