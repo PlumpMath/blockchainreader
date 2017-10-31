@@ -141,11 +141,12 @@ namespace blockchain_parser.Model
 					catch (Exception e)
 					{
 						Logger.LogStatus(ConsoleColor.Red, "DATABASE ERROR: " + ((e.InnerException == null) ? e.ToString() : e.InnerException.ToString()));
+						Environment.Exit(1);
 					}
 
 				} while (save_failed);
 				return null;
 			}
-}
+		}
     }
 }

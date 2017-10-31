@@ -22,10 +22,13 @@ namespace blockchain_parser.Blockchain.Ethereum
                     response = JObject.Parse(message);
                 }catch(Exception ex){
                     Logger.LogStatus(ConsoleColor.Red, "ERROR: " + ex);
+                    Environment.Exit(1);
                     return;
                 }
                 if(response != null && response.@params != null && response.@params.result != null)
-                    Task.Factory.StartNew(() => {block_result(response.@params.result);});
+                    Task.Factory.StartNew(() => {
+                        block_result(response.@params.result);
+                    });
             };
 
             webSocket.onError = (error) => {

@@ -34,3 +34,4 @@ bin/netcoreapp2.0/blockchain_parser.pdb
 bin/netcoreapp2.0/blockchain_parser.deps.json
 bin/netcoreapp2.0/blockchain_parser.runtimeconfig.json
 bin/netcoreapp2.0/blockchain_parser.runtimeconfig.dev.json
+bin/Debug/netcoreapp2.0/appsettings.json
