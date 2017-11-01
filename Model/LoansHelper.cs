@@ -10,7 +10,7 @@ namespace blockchain_parser.Model
 
         public List<Loans> FindProjects(List<string> addresses) {
            return IncludeReads(db => db.Loans, include => include.InvestorPaymentReferences, 
-            condition => ValueIsThere(condition.WalletAddress, addresses));
+            condition => addresses.Any(a => condition.WalletAddress == a));
         }
     }
 }

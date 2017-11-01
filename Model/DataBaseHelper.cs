@@ -10,14 +10,7 @@ namespace blockchain_parser.Model
     public abstract class DataBaseHelper
     {
         public DataBaseHelper() {}
-
-         protected bool ValueIsThere<T>(T value, List<T> values) {
-            foreach(T v in values)
-                if(v != null && value != null && v.ToString().ToLower().Equals(value.ToString().ToLower()))
-                    return true;
-            return false;
-        }
-
+		
 		protected T Read<T, M>(Func<FynContext, DbSet<T>> query,
 			Expression<Func<T, M>> sort_desceding) where T : class
 		{

@@ -88,7 +88,6 @@ namespace blockchain_parser.Blockchain
             var bids_helper = new LoanBidsHelper();
             var bid = CreateBid(0, null, null, transaction, block_number, -1);
             bids_helper.CreateOrUpdateLastBlock(bid);
-            
         }
 
         private LoanBids CreateBid(int loan_id, long? ref_id, int? investor_id, Transaction transaction, ulong block_number,
@@ -125,6 +124,5 @@ namespace blockchain_parser.Blockchain
 
             return bid;
         }
-
     }
 }
