@@ -67,7 +67,7 @@ namespace blockchain_parser
         static void Main(string[] args)
         {
 
-           Print("*Blockchain Parser* version 0.1.0.8");
+           Print("*Blockchain Parser* version 0.1.0.9");
            
            var bids_helper = new LoanBidsHelper();
            var latest_block = bids_helper.getLatestBlock();
