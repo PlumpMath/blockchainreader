@@ -74,7 +74,15 @@ namespace blockchain_parser
            
            PrePrint("latest block: " + ((latest_block.HasValue) ? latest_block.Value.ToString() : "none"));
            
-           if(latest_block.HasValue) {
+           if(args.Length > 0) {
+               foreach(var block_hash in args){
+                 var block_details = Ethereum.GetBlockDetails(block_hash);
+                 var block_processor = new BlockProcessor();
+                 block_processor.onTransactionsTo = processTransactionsTo;
+                 block_processor.processBlockDetails(block_details);
+               }
+           }
+           else if(latest_block.HasValue) {
                 var block_details = Ethereum.GetBlockDetails((ulong)latest_block.Value);
                 while(block_details != null) {
                     PrePrint("recover block " + block_details.hash);
