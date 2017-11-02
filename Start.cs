@@ -63,12 +63,7 @@ namespace blockchain_parser
              Release(backers_handler);
         }
 
-
-        static void Main(string[] args)
-        {
-
-           Print("*Blockchain Parser* version 0.1.0.9");
-           
+        private static void processPastBlocks(string[] args) {
            var bids_helper = new LoanBidsHelper();
            var latest_block = bids_helper.getLatestBlock();
            
@@ -76,6 +71,7 @@ namespace blockchain_parser
            
            if(args.Length > 0) {
                foreach(var block_hash in args){
+                 PrePrint("recover block " + block_hash);
                  var block_details = Ethereum.GetBlockDetails(block_hash);
                  var block_processor = new BlockProcessor();
                  block_processor.onTransactionsTo = processTransactionsTo;
@@ -94,7 +90,14 @@ namespace blockchain_parser
                 }
 		        PrePrint("recovering finished on block " + (latest_block-1));
             }
+        }
 
+        static void Main(string[] args)
+        {
+           Print("*Blockchain Parser* version 0.1.0.9");
+
+           processPastBlocks(args);
+           
            Ethereum.StartListenNewBlocks((new_block) => {
                Print("processing block " + new_block.hash);
                var block_processor = new BlockProcessor();
@@ -110,6 +113,7 @@ namespace blockchain_parser
                     break;
             }
             Ethereum.StopListenNewBlocks();
+            Print("Service ended");
         }
     }
 }
