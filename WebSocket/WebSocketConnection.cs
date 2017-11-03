@@ -173,7 +173,7 @@ namespace blockchain_parser.WebSockets
 
         private void handleException(Exception e) {
             if(verbose)
-                Logger.LogStatus(ConsoleColor.Red, "Exception: " + ex);
+                Logger.LogStatus(ConsoleColor.Red, "Exception: " + e);
             onError(e);
             Close();
         }
