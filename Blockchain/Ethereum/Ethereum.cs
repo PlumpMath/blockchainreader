@@ -1,5 +1,5 @@
 using System;
-using blockchain_parser.WebSocket;
+using blockchain_parser.WebSockets;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Net;

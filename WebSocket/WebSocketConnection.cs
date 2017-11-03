@@ -5,7 +5,7 @@ using System.Threading;
 using System.Text;
 using System.IO;
 
-namespace blockchain_parser.WebSocket
+namespace blockchain_parser.WebSockets
 {
     public class WebSocketConnection
     {
@@ -14,7 +14,7 @@ namespace blockchain_parser.WebSocket
         private readonly ulong totalMessageLimit = AppConfig.WebSocketMessageLimit;
         private readonly bool verbose = AppConfig.WebSocketLogVerbose;
         private readonly UTF8Encoding encoder = new UTF8Encoding();
-        private ClientWebSocket webSocket = null;
+        private WebSocket webSocket = null;
 
         public Action onOpen {
             private get;
@@ -52,8 +52,9 @@ namespace blockchain_parser.WebSocket
         
         }
 
-        public void Connect(string uri) {
-            ConnectServer(uri).ConfigureAwait(false);
+        public void Connect(string uri, WebSocket connection = null) {
+            connection = connection ?? new ClientWebSocket();
+            ConnectServer(uri, connection).ConfigureAwait(false);
         }
 
         public void Close() {
@@ -73,19 +74,20 @@ namespace blockchain_parser.WebSocket
         }
 
         public void SendMessage(string message) {
-            
-            try {
-                Send(message).ConfigureAwait(false);
-            }
-            catch(Exception ex) {
-                if(verbose)
-                    Logger.LogStatus(ConsoleColor.Red, "Exception: " + ex);
-                    onError(ex);
-                Close();
-            }
+
+            var t = new Task (async () => 
+                    { 
+                        try {
+                            await Send(message);
+                        } catch(Exception ex) {
+                            handleException(ex);
+                        }
+                    }
+                );
+            t.Start();
         }
 
-        private async Task ConnectServer(string uri)
+        private async Task ConnectServer(string uri, WebSocket connection)
         {
             try
             {
@@ -94,21 +96,27 @@ namespace blockchain_parser.WebSocket
                     Logger.LogStatus(ConsoleColor.Green, "Connecting to " + uri + " ...");
                 lock (objectLock)
                 {
-                    webSocket = new ClientWebSocket();
+                    webSocket = connection;
                 }
-                await webSocket.ConnectAsync(new Uri(uri), CancellationToken.None);
+                if(webSocket is ClientWebSocket)
+                    await ((ClientWebSocket)webSocket).ConnectAsync(new Uri(uri), CancellationToken.None);
                 if(verbose)
                     Logger.LogStatus(ConsoleColor.Green, uri + " connected!");
-                var t = new Task (async () => await Task.WhenAll(Receive()));
+                var t = new Task (async () => 
+                    { 
+                        try {
+                            await Receive();
+                        } catch(Exception ex) {
+                            handleException(ex);
+                        }
+                    }
+                );
                 t.Start();
                 onOpen();
             }
             catch (Exception ex)
             {
-                if(verbose)
-                   Logger.LogStatus(ConsoleColor.Red, "Exception: " + ex);
-                onError(ex);
-                Close();
+               handleException(ex);
             }
         }
 
@@ -162,5 +170,13 @@ namespace blockchain_parser.WebSocket
                }
             }
         }
+
+        private void handleException(Exception e) {
+            if(verbose)
+                Logger.LogStatus(ConsoleColor.Red, "Exception: " + ex);
+            onError(e);
+            Close();
+        }
+
     }
 }
