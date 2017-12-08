@@ -228,6 +228,25 @@ namespace blockchain_parser.Model
                 entity.Property(e => e.To)
                     .IsRequired()
                     .HasColumnName("to");
+
+                entity.Property(e => e.TransactionType)
+                    .IsRequired()
+                    .HasColumnType("smallint(6)")
+                    .HasColumnName("tx_type");
+                
+                 entity.Property(e => e.Currency)
+                    .IsRequired()
+                    .HasColumnType("smallint(6)")
+                    .HasColumnName("currency");
+
+                 entity.Property(e => e.RefCode)
+                    .IsRequired()
+                    .HasColumnName("ref_code");
+                
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasColumnType("smallint(6)")
+                    .HasColumnName("status");
             });
 
             modelBuilder.Entity<Loans>(entity =>

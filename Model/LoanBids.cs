@@ -21,5 +21,9 @@ namespace blockchain_parser.Model
         public long BlockNumber { get; set; }
         public string From { get; set; }
         public string To { get; set; }
+        public short TransactionType { get; set; }
+        public short Currency { get; set; }
+        public string RefCode { get; set; }
+        public short Status { get; set; }
     }
 }

@@ -47,7 +47,6 @@ namespace blockchain_parser.Model
 		{
 			return ExecuteDbTransaction(db =>
 			{
-				var q = query(db).Include(include).Where(condition);
 				List<T> item = query(db).Include(include).Where(condition).ToList();
 				return item;
 			});

@@ -29,24 +29,24 @@ namespace blockchain_parser.Blockchain
             }
 
             Print("found projects: " + projects.Count);
+            var found =  new HashSet<String>();
 
             foreach(var project in projects) {
                 var project_transactions = transactions[project.WalletAddress.ToLower()];
                 foreach(var project_transaction in project_transactions){
                     long? ref_id = (project_transaction.input ==  "0x0") ? null : 
                         Start.HexToLong(project_transaction.input);
-                    bool found = false;
                     if(ref_id.HasValue)
                         foreach(var reference in project.InvestorPaymentReferences)
                         {
                             if(reference.RefId == ref_id){
                                 all_bids.Add(CreateBid(project.LoanId, ref_id, reference.InvestorId, project_transaction, block_number));
-                                found = true;
+                                found.Add(project.LoanReferenceNumber);
                                 backers_counter++;
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
                             }
                         } 
-                    if(!ref_id.HasValue || !found){
+                    if(!ref_id.HasValue || !found.Contains(project.LoanReferenceNumber)){
                         if(!no_backer_bids.ContainsKey(project_transaction.from.ToLower()))
                             no_backer_bids.Add(project_transaction.from.ToLower(), new List<LoanBids>());
                         no_backer_bids[project_transaction.from.ToLower()].Add(CreateBid(project.LoanId, null, null, project_transaction, block_number));
@@ -121,6 +121,10 @@ namespace blockchain_parser.Blockchain
             bid.BlockNumber = (long)block_number;
             bid.From = transaction.from;
             bid.To = transaction.to;
+            bid.TransactionType = 1;
+            bid.Currency = 1;
+            bid.RefCode = null;
+            bid.Status = 1;
 
             return bid;
         }
