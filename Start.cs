@@ -94,7 +94,7 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.0.9");
+           Print("*Blockchain Parser* version 0.1.1.0");
 
            processPastBlocks(args);
            
