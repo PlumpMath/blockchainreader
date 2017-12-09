@@ -16,7 +16,6 @@ namespace blockchain_parser.Model
         public DateTime? ProcessDate { get; set; }
         public decimal? Emi { get; set; }
         public string TransId { get; set; }
-        public long? RefId { get; set; }
         public string Remarks { get; set; }
         public long BlockNumber { get; set; }
         public string From { get; set; }

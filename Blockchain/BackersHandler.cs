@@ -116,7 +116,6 @@ namespace blockchain_parser.Blockchain
             bid.LoanId = loan_id;
             bid.InvestorId = investor_id;
             bid.ProcessDate = DateTime.UtcNow;
-            bid.RefId = ref_id;
             bid.TransId = transaction.hash;
             bid.BlockNumber = (long)block_number;
             bid.From = transaction.from;

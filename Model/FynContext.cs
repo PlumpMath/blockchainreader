@@ -205,10 +205,6 @@ namespace blockchain_parser.Model
                     .HasColumnName("process_date")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.RefId)
-                    .HasColumnName("ref_id")
-                    .HasColumnType("bigint(20)");
-
                 entity.Property(e => e.Remarks).HasColumnName("remarks");
 
                 entity.Property(e => e.TransId)
