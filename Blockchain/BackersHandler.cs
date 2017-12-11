@@ -46,10 +46,11 @@ namespace blockchain_parser.Blockchain
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
                             }
                         } 
-                    if(!ref_id.HasValue || !found.Contains(project.LoanReferenceNumber)){
+                    if(!ref_id.HasValue && !found.Contains(project.LoanReferenceNumber)){
                         if(!no_backer_bids.ContainsKey(project_transaction.from.ToLower()))
                             no_backer_bids.Add(project_transaction.from.ToLower(), new List<LoanBids>());
                         no_backer_bids[project_transaction.from.ToLower()].Add(CreateBid(project.LoanId, null, null, project_transaction, block_number));
+                        found.Add(project.LoanReferenceNumber);
                         if(!backer_addressess.Contains(project_transaction.from.ToLower()))
                             backer_addressess.Add(project_transaction.from.ToLower());
                         Print("potentially unidentified transaction: " + project_transaction.hash);
