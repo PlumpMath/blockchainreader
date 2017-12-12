@@ -11,6 +11,7 @@ namespace blockchain_parser.Model
         public virtual DbSet<Investors> Investors { get; set; }
         public virtual DbSet<LoanBids> LoanBids { get; set; }
         public virtual DbSet<Loans> Loans { get; set; }
+        public virtual DbSet<EmailNotifications> EmailNotifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -22,6 +23,74 @@ namespace blockchain_parser.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<EmailNotifications>(entity =>
+            {
+                 entity.HasKey(e => e.SlugName);
+                 entity.HasAlternateKey(e => e.Language);
+                 entity.ToTable("email_notifications");
+                 
+                entity.Property(e => e.SlugName)
+                    .HasColumnName("slug_name");
+                
+                entity.Property(e => e.Subject)
+                    .HasColumnName("email_subject").IsRequired();
+                
+                entity.Property(e => e.Message)
+                    .HasColumnName("email_content");
+
+                entity.Property(e => e.Language)
+                    .HasColumnName("language");
+                    
+            });
+
+            modelBuilder.Entity<Borrowers>(entity =>
+            {
+                 entity.HasKey(e => e.BorrowerId);
+                 entity.ToTable("borrowers");
+                 entity.HasIndex(e => e.UserId).HasName("fk_borrowers_users_idx");
+                 
+                 entity.Property(e => e.BorrowerId)
+                    .HasColumnName("borrower_id")
+                    .HasColumnType("int(11)");
+                
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("int(11)").IsRequired();
+
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId);
+            });
+
+            modelBuilder.Entity<Users>(entity =>
+            {
+                 entity.HasKey(e => e.UserId);
+                 entity.ToTable("users");
+
+                 entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.UserType)
+                    .HasColumnName("usertype")
+                    .HasColumnType("int(11)").IsRequired();
+                
+                entity.Property(e => e.Username)
+                    .HasColumnName("username").IsRequired();
+
+                entity.Property(e => e.Email)
+                    .HasColumnName("email").IsRequired();
+
+                entity.Property(e => e.FirstName)
+                    .HasColumnName("firstname"); 
+
+                entity.Property(e => e.LastName)
+                    .HasColumnName("lastname");         
+
+                entity.Property(e => e.Language)
+                    .HasColumnName("language")
+                    .HasColumnType("int(11)").IsRequired();      
+            });
+
             modelBuilder.Entity<InvestorPaymentReferences>(entity =>
             {
                 entity.HasKey(e => e.RefId);
@@ -68,6 +137,8 @@ namespace blockchain_parser.Model
                     .HasForeignKey(d => d.LoanId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_investor_payment_references_3");
+                
+                entity.HasOne(e => e.Investor).WithMany().HasForeignKey(e => e.InvestorId);
             });
 
             modelBuilder.Entity<Investors>(entity =>
@@ -149,6 +220,8 @@ namespace blockchain_parser.Model
                 entity.Property(e => e.Status)
                     .HasColumnName("status")
                     .HasColumnType("int(11)");
+
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId);
             });
 
             modelBuilder.Entity<LoanBids>(entity =>
@@ -530,6 +603,8 @@ namespace blockchain_parser.Model
                 entity.Property(e => e.WalletAddress)
                     .HasColumnName("wallet_address")
                     .HasMaxLength(255);
+
+                entity.HasOne(e => e.Creator).WithMany().HasForeignKey(e => e.BorrowerId);
             });
         }
 

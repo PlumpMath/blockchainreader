@@ -54,5 +54,41 @@ namespace blockchain_parser
                 return Convert.ToUInt32(Configuration["ReceiveChunkSize"]);
             }
         }
+
+        public static string SmtpHost {
+            get {
+                return Configuration["SMTP:Host"];
+            }
+        }
+
+         public static ushort SmtpPort {
+            get {
+                return Convert.ToUInt16(Configuration["SMTP:Port"]);
+            }
+        }
+
+        public static string SmtpUsername {
+            get {
+                return Configuration["SMTP:Username"];
+            }
+        }
+
+        public static string SmtpPassword {
+            get {
+                return Configuration["SMTP:Password"];
+            }
+        }
+
+        public static Tuple<string, string> SmtpFrom {
+            get {
+                return new Tuple<string, string>(Configuration["SMTP:FromAddress"], Configuration["SMTP:FromName"]);
+            }
+        }
+
+        public static bool SmtpEncryption {
+            get {
+                return Convert.ToBoolean(Configuration["SMTP:Encryption"]);
+            }
+        }
     }
 }

@@ -8,7 +8,9 @@ namespace blockchain_parser.Model
     public class InvestorsHelper : DataBaseHelper
     {
         public List<Investors> FindBackers(List<string> addresses) {
-            return Reads(db => db.Investors, condition => condition.Eth != null && addresses.Any(a => condition.Eth.Equals(a, StringComparison.CurrentCultureIgnoreCase)));
+            return IncludeReads(db => db.Investors, include => include.User,
+             condition => condition.Eth != null 
+             && addresses.Any(a => condition.Eth.Equals(a, StringComparison.CurrentCultureIgnoreCase)));
         }
     }
 }

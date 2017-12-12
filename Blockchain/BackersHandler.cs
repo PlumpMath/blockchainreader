@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using blockchain_parser.Model;
 using System.Numerics;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace blockchain_parser.Blockchain
 {
@@ -128,5 +129,12 @@ namespace blockchain_parser.Blockchain
 
             return bid;
         }
+
+        private void SendEmailNotification() {
+            Task.Factory.StartNew(() => {
+                
+            });
+        }
     }
+    
 }

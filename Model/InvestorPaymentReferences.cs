@@ -12,9 +12,7 @@ namespace blockchain_parser.Model
         public int LoanId { get; set; }
         public int RewardId { get; set; }
 
-        [ForeignKey("LoanId")]
         public Loans Loan { get; set; }
-        [ForeignKey("InvestorId")]
         public Investors Investor { get; set; }
     }
 }

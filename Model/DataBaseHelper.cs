@@ -42,7 +42,7 @@ namespace blockchain_parser.Model
         }
 
 		protected List<T> IncludeReads<T, M>(Func<FynContext, DbSet<T>> query,
-			Expression<Func<T, IEnumerable<M>>> include, Expression<Func<T, bool>> condition) 
+			Expression<Func<T, M>> include, Expression<Func<T, bool>> condition) 
             where T : class where M : class
 		{
 			return ExecuteDbTransaction(db =>

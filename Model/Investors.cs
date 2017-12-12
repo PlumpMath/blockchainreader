@@ -21,5 +21,6 @@ namespace blockchain_parser.Model
         public string IdentityCardImageBack { get; set; }
         public string AddressProofImage { get; set; }
         public string Eth { get; set; }
+        public Users User { get; set; }
     }
 }

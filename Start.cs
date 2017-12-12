@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using blockchain_parser.Model;
 using System.Threading;
 using System.Linq;
+using blockchain_parser.Utils;
 
 namespace blockchain_parser
 {
@@ -94,10 +95,8 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.1");
+           Print("*Blockchain Parser* version 0.1.1.2");
 
-           processPastBlocks(args);
-           
            Ethereum.StartListenNewBlocks((new_block) => {
                Print("processing block " + new_block.hash);
                var block_processor = new BlockProcessor();
@@ -113,6 +112,7 @@ namespace blockchain_parser
                     break;
             }
             Ethereum.StopListenNewBlocks();
+            
             Print("Service ended");
         }
     }
