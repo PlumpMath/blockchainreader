@@ -72,7 +72,7 @@ namespace blockchain_parser.Blockchain
                                 found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(true, null, null);
                                 backers_counter++;
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
-                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value, true);
+                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value);
                             }
                         } 
                     if(!ref_id.HasValue && !found.ContainsKey(project.LoanReferenceNumber)){
@@ -104,7 +104,7 @@ namespace blockchain_parser.Blockchain
                     bid.BidStatus = 1;
                     backers_counter++;
                     Print("backer " + bid.InvestorId + " found for project: " + bid.LoanId + ", transaction: " + bid.TransId);
-                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value, false);
+                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value);
                     bid.Project = null;
                 }
             }
@@ -155,8 +155,7 @@ namespace blockchain_parser.Blockchain
             return bid;
         }
 
-        private void SendEmailNotification(Loans project, Investors backer, Users creator, decimal amount,
-            bool user_ref) {
+        private void SendEmailNotification(Loans project, Investors backer, Users creator, decimal amount) {
 
             if(project == null || backer == null || creator == null){
                 Print("PARAMETERS FOR SENDING EMAIL ARE MISSSING!");
@@ -165,8 +164,7 @@ namespace blockchain_parser.Blockchain
 
             Task.Factory.StartNew(() => {
                 var emails = new EmailNotificationsHelper();
-                var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, 
-                    (user_ref) ? Convert.ToInt32(project.Language) : backer.User.Language);
+                var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, backer.User.Language);
                 var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
 
                 if(backer_email == null || caretor_email == null){
