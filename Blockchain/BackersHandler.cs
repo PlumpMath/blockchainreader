@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Globalization;
 using System.Threading.Tasks;
 using blockchain_parser.Utils;
+using System.Threading;
 
 namespace blockchain_parser.Blockchain
 {
@@ -162,7 +163,7 @@ namespace blockchain_parser.Blockchain
                 return;
             }
 
-            Task.Factory.StartNew(() => {
+            ThreadPool.QueueUserWorkItem(new WaitCallback(p => {
                 var emails = new EmailNotificationsHelper();
                 var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, backer.User.Language);
                 var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
@@ -206,7 +207,7 @@ namespace blockchain_parser.Blockchain
                     Print("UNABLE TO SENT EMAIL  " + caretor_email.Subject + " TO " + creator.Email);
                  else
                     Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
-            });
+            }));
         }
     }
     
