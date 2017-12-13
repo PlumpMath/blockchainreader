@@ -186,6 +186,7 @@ namespace blockchain_parser.Blockchain
 
                 var email_to_backer = new Email(backer_email.Subject, backer_email.Message, backer.User.Email);
                 var email_to_creator = new Email(caretor_email.Subject, caretor_email.Message, creator.Email);
+                
                 int sending_tries = 10;
                 while(!email_to_backer.Send() && sending_tries > 0){
                     sending_tries--;
@@ -195,6 +196,7 @@ namespace blockchain_parser.Blockchain
                     Print("UNABLE TO SENT EMAIL  " + backer_email.Subject + " TO " + backer.User.Email);
                 else
                     Print("Notification email " + backer_email.Subject + " sent to " + backer.User.Email);
+
                 sending_tries = 10;
                  while(!email_to_creator.Send() && sending_tries > 0) {
                      sending_tries--;
