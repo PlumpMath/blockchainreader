@@ -13,12 +13,12 @@ namespace blockchain_parser
     {
 
         public static void Release(object release) {
-            Print(String.Format("Memory used before collection:       {0:N0} bytes", 
+           /* Print(String.Format("Memory used before collection:       {0:N0} bytes", 
                 GC.GetTotalMemory(false)));
             GC.Collect();
             GC.SuppressFinalize(release);
             Print(String.Format("Memory used after full collection:   {0:N0} bytes", 
-                GC.GetTotalMemory(true)));
+                GC.GetTotalMemory(true))); */
         }
         public static string PrepareHex(string hex) {
             if(hex.StartsWith("0x"))
@@ -95,7 +95,7 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.3");
+           Print("*Blockchain Parser* version 0.1.1.4");
 
            processPastBlocks(args);
 
