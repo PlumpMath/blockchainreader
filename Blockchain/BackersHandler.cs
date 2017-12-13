@@ -164,6 +164,10 @@ namespace blockchain_parser.Blockchain
             }
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(p => {
+
+            }));
+
+            Task.Factory.StartNew(() => {
                 var emails = new EmailNotificationsHelper();
                 var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, backer.User.Language);
                 var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
@@ -207,7 +211,7 @@ namespace blockchain_parser.Blockchain
                     Print("UNABLE TO SENT EMAIL  " + caretor_email.Subject + " TO " + creator.Email);
                  else
                     Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
-            }));
+            });
         }
     }
     
