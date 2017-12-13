@@ -25,8 +25,10 @@ namespace blockchain_parser.Blockchain
             int backers_counter = 0;
             if(projects == null || projects.Count == 0){
                 Print("no any backer transactions");
-                if(all_transactions.Count > 0)
+                if(all_transactions.Count > 0){
                     SaveLastBlockNumber(all_transactions[0], block_number);
+                    Print("Sync block updated: " + block_number);
+                }
                 return;
             }
 
@@ -70,7 +72,7 @@ namespace blockchain_parser.Blockchain
                                 found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(true, null, null);
                                 backers_counter++;
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
-                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value);
+                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value, true);
                             }
                         } 
                     if(!ref_id.HasValue && !found.ContainsKey(project.LoanReferenceNumber)){
@@ -102,7 +104,7 @@ namespace blockchain_parser.Blockchain
                     bid.BidStatus = 1;
                     backers_counter++;
                     Print("backer " + bid.InvestorId + " found for project: " + bid.LoanId + ", transaction: " + bid.TransId);
-                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value);
+                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value, false);
                     bid.Project = null;
                 }
             }
@@ -153,35 +155,57 @@ namespace blockchain_parser.Blockchain
             return bid;
         }
 
-        private void SendEmailNotification(Loans project, Investors backer, Users creator, decimal amount) {
+        private void SendEmailNotification(Loans project, Investors backer, Users creator, decimal amount,
+            bool user_ref) {
 
-            if(project == null || backer == null || creator == null)
+            if(project == null || backer == null || creator == null){
+                Print("PARAMETERS FOR SENDING EMAIL ARE MISSSING!");
                 return;
+            }
 
             Task.Factory.StartNew(() => {
                 var emails = new EmailNotificationsHelper();
-                var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, Convert.ToInt32(project.Language));
+                var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, 
+                    (user_ref) ? Convert.ToInt32(project.Language) : backer.User.Language);
                 var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
 
-                if(backer_email == null || caretor_email == null)
+                if(backer_email == null || caretor_email == null){
+                    Print("EMAILS TEMPLATES ARE MISSSING!");
                     return;
+                }
 
                 backer_email.Message = backer_email.Message.Replace("[amount]", amount.ToString());
                 backer_email.Message = backer_email.Message.Replace("[project_url]", project.UrlTitle);
                 backer_email.Message = backer_email.Message.Replace("[project]", project.LoanTitle);
                 backer_email.Message = backer_email.Message.Replace("[eth_address]", backer.Eth);
+                backer_email.Message = backer_email.Message.Replace("[currency]", "ETH");
 
                 caretor_email.Message = caretor_email.Message.Replace("[amount]", amount.ToString());
                 caretor_email.Message = caretor_email.Message.Replace("[project_url]", project.UrlTitle);
                 caretor_email.Message = caretor_email.Message.Replace("[project]", project.LoanTitle);
                 caretor_email.Message = caretor_email.Message.Replace("[backer]", backer.User.Username);
+                caretor_email.Message = caretor_email.Message.Replace("[currency]", "ETH");
 
                 var email_to_backer = new Email(backer_email.Subject, backer_email.Message, backer.User.Email);
                 var email_to_creator = new Email(caretor_email.Subject, caretor_email.Message, creator.Email);
-                email_to_backer.Send();
-                Print("Notification email " + backer_email.Subject + " sent to " + backer.User.Email);
-                email_to_creator.Send();
-                Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
+                int sending_tries = 10;
+                while(!email_to_backer.Send() && sending_tries > 0){
+                    sending_tries--;
+                    Print("Failed to send email, resending... " + sending_tries);
+                }
+                if(sending_tries == 0)
+                    Print("UNABLE TO SENT EMAIL  " + backer_email.Subject + " TO " + backer.User.Email);
+                else
+                    Print("Notification email " + backer_email.Subject + " sent to " + backer.User.Email);
+                sending_tries = 10;
+                 while(!email_to_creator.Send() && sending_tries > 0) {
+                     sending_tries--;
+                      Print("Failed to send email, resending... " + sending_tries);
+                 }
+                 if(sending_tries == 0)
+                    Print("UNABLE TO SENT EMAIL  " + caretor_email.Subject + " TO " + creator.Email);
+                 else
+                    Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
             });
         }
     }

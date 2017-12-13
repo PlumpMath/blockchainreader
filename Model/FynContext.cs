@@ -316,6 +316,8 @@ namespace blockchain_parser.Model
                     .IsRequired()
                     .HasColumnType("smallint(6)")
                     .HasColumnName("status");
+                
+                entity.Ignore(e => e.Project);
             });
 
             modelBuilder.Entity<Loans>(entity =>

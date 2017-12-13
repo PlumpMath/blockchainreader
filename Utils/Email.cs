@@ -15,7 +15,9 @@ namespace blockchain_parser.Utils
             this.message = message;
             this.to = to;
         }
-        public void Send() {
+        public bool Send() {
+            
+            var result = true;
             SmtpClient client = new SmtpClient(AppConfig.SmtpHost, AppConfig.SmtpPort);
             client.UseDefaultCredentials = false;
             client.EnableSsl = AppConfig.SmtpEncryption;
@@ -37,10 +39,12 @@ namespace blockchain_parser.Utils
            }
            catch(Exception ex) {
                Logger.LogStatus(ConsoleColor.Red, ex.ToString());
+               result = false;
            }
 
             mailMessage.Dispose();
             client.Dispose();
+            return result;
         }
     }
 }
