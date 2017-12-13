@@ -90,5 +90,17 @@ namespace blockchain_parser
                 return Convert.ToBoolean(Configuration["SMTP:Encryption"]);
             }
         }
+
+        public static string NotifyBackerEmailTemplate {
+            get {
+                return Configuration["EmailTemplates:NotifyBacker"];
+            }
+        }
+
+         public static string NotifyCreatorEmailTemplate {
+            get {
+                return Configuration["EmailTemplates:NotifyCreator"];
+            }
+        }
     }
 }

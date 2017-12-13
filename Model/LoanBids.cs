@@ -24,5 +24,6 @@ namespace blockchain_parser.Model
         public short Currency { get; set; }
         public string RefCode { get; set; }
         public short Status { get; set; }
+        public Loans Project { get; set; }
     }
 }

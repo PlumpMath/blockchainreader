@@ -5,6 +5,7 @@ using blockchain_parser.Model;
 using System.Numerics;
 using System.Globalization;
 using System.Threading.Tasks;
+using blockchain_parser.Utils;
 
 namespace blockchain_parser.Blockchain
 {
@@ -30,34 +31,8 @@ namespace blockchain_parser.Blockchain
             }
 
             Print("found projects: " + projects.Count);
-            var found =  new HashSet<String>();
-
-            foreach(var project in projects) {
-                var project_transactions = transactions[project.WalletAddress.ToLower()];
-                foreach(var project_transaction in project_transactions){
-                    long? ref_id = (project_transaction.input ==  "0x0") ? null : 
-                        Start.HexToLong(project_transaction.input);
-                    if(ref_id.HasValue)
-                        foreach(var reference in project.InvestorPaymentReferences)
-                        {
-                            if(reference.RefId == ref_id){
-                                all_bids.Add(CreateBid(project.LoanId, ref_id, reference.InvestorId, project_transaction, block_number));
-                                found.Add(project.LoanReferenceNumber);
-                                backers_counter++;
-                                Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
-                            }
-                        } 
-                    if(!ref_id.HasValue && !found.Contains(project.LoanReferenceNumber)){
-                        if(!no_backer_bids.ContainsKey(project_transaction.from.ToLower()))
-                            no_backer_bids.Add(project_transaction.from.ToLower(), new List<LoanBids>());
-                        no_backer_bids[project_transaction.from.ToLower()].Add(CreateBid(project.LoanId, null, null, project_transaction, block_number));
-                        found.Add(project.LoanReferenceNumber);
-                        if(!backer_addressess.Contains(project_transaction.from.ToLower()))
-                            backer_addressess.Add(project_transaction.from.ToLower());
-                        Print("potentially unidentified transaction: " + project_transaction.hash);
-                    }
-                }
-            }
+            processProjects(projects, transactions, all_bids, no_backer_bids, 
+                backer_addressess, block_number, ref backers_counter);
 
             all_bids.AddRange (searchBackers(no_backer_bids, backer_addressess, ref backers_counter));
             bids_helper.PopulateBackersFundingTransactions(all_bids);
@@ -69,7 +44,53 @@ namespace blockchain_parser.Blockchain
             Logger.LogStatus(ConsoleColor.Cyan, message);
         }
 
+        private void processProjects(List<Loans> projects, Dictionary<string, List<Transaction>> transactions,
+            List<LoanBids> all_bids, Dictionary<string, List<LoanBids>> no_backer_bids, 
+            HashSet<string> backer_addressess, ulong block_number, ref int backers_counter) {
+            var found =  new Dictionary<String, Tuple<Boolean, String, LoanBids>>();
+
+            foreach(var project in projects) {
+                var project_transactions = transactions[project.WalletAddress.ToLower()];
+                foreach(var project_transaction in project_transactions){
+                    long? ref_id = (project_transaction.input ==  "0x0") ? null : 
+                        Start.HexToLong(project_transaction.input);
+                    if(ref_id.HasValue)
+                        foreach(var reference in project.InvestorPaymentReferences)
+                        {
+                            if(reference.RefId == ref_id){
+                                if(found.ContainsKey(project.LoanReferenceNumber)) {
+                                    var remove = found[project.LoanReferenceNumber];
+                                    if(remove.Item1)
+                                        continue;
+                                    backer_addressess.Remove(remove.Item2);
+                                    no_backer_bids[remove.Item2].Remove(remove.Item3);
+                                }
+                                var bid = CreateBid(project.LoanId, ref_id, reference.InvestorId, project_transaction, block_number);
+                                all_bids.Add(bid);
+                                found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(true, null, null);
+                                backers_counter++;
+                                Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
+                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value);
+                            }
+                        } 
+                    if(!ref_id.HasValue && !found.ContainsKey(project.LoanReferenceNumber)){
+                        var from_address = project_transaction.from.ToLower();
+                        if(!no_backer_bids.ContainsKey(from_address))
+                            no_backer_bids.Add(from_address, new List<LoanBids>());
+                        var item  = CreateBid(project.LoanId, null, null, project_transaction, block_number);
+                        item.Project = project;
+                        no_backer_bids[from_address].Add(item);
+                        if(!backer_addressess.Contains(from_address))
+                            backer_addressess.Add(from_address);
+                        found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(false, from_address, item);
+                        Print("potentially unidentified transaction: " + project_transaction.hash);
+                    }
+                }
+            }
+        }
+
         private List<LoanBids> searchBackers(Dictionary<string, List<LoanBids>> no_backer_bids, HashSet<string> backer_addresses,
+
             ref int backers_counter) {
             var backers_helper  = new InvestorsHelper();
             var backers = backers_helper.FindBackers(backer_addresses.ToList());
@@ -81,6 +102,8 @@ namespace blockchain_parser.Blockchain
                     bid.BidStatus = 1;
                     backers_counter++;
                     Print("backer " + bid.InvestorId + " found for project: " + bid.LoanId + ", transaction: " + bid.TransId);
+                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value);
+                    bid.Project = null;
                 }
             }
             return no_backer_bids.Values.ToList().SelectMany(x => x).ToList();;
@@ -130,9 +153,35 @@ namespace blockchain_parser.Blockchain
             return bid;
         }
 
-        private void SendEmailNotification() {
+        private void SendEmailNotification(Loans project, Investors backer, Users creator, decimal amount) {
+
+            if(project == null || backer == null || creator == null)
+                return;
+
             Task.Factory.StartNew(() => {
-                
+                var emails = new EmailNotificationsHelper();
+                var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, Convert.ToInt32(project.Language));
+                var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
+
+                if(backer_email == null || caretor_email == null)
+                    return;
+
+                backer_email.Message = backer_email.Message.Replace("[amount]", amount.ToString());
+                backer_email.Message = backer_email.Message.Replace("[project_url]", project.UrlTitle);
+                backer_email.Message = backer_email.Message.Replace("[project]", project.LoanTitle);
+                backer_email.Message = backer_email.Message.Replace("[eth_address]", backer.Eth);
+
+                caretor_email.Message = caretor_email.Message.Replace("[amount]", amount.ToString());
+                caretor_email.Message = caretor_email.Message.Replace("[project_url]", project.UrlTitle);
+                caretor_email.Message = caretor_email.Message.Replace("[project]", project.LoanTitle);
+                caretor_email.Message = caretor_email.Message.Replace("[backer]", backer.User.Username);
+
+                var email_to_backer = new Email(backer_email.Subject, backer_email.Message, backer.User.Email);
+                var email_to_creator = new Email(caretor_email.Subject, caretor_email.Message, creator.Email);
+                email_to_backer.Send();
+                Print("Notification email " + backer_email.Subject + " sent to " + backer.User.Email);
+                email_to_creator.Send();
+                Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
             });
         }
     }

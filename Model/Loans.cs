@@ -76,6 +76,7 @@ namespace blockchain_parser.Model
         public string PresaleTermsAndConditions { get; set; }
         public string PresaleCustomText { get; set; }
         public string UrlTitle { get; set; }
+        public string Language { get; set; }
         public Borrowers Creator { get; set; }
 
         public ICollection<InvestorPaymentReferences> InvestorPaymentReferences { get; set; }

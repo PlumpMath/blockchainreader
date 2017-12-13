@@ -603,6 +603,9 @@ namespace blockchain_parser.Model
                 entity.Property(e => e.WalletAddress)
                     .HasColumnName("wallet_address")
                     .HasMaxLength(255);
+                
+                entity.Property(e => e.Language)
+                    .HasColumnName("language");
 
                 entity.HasOne(e => e.Creator).WithMany().HasForeignKey(e => e.BorrowerId);
             });
