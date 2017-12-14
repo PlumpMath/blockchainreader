@@ -62,7 +62,7 @@ namespace blockchain_parser.Blockchain
                         {
                             if(reference.RefId == ref_id){
                                 if(found.ContainsKey(project.LoanReferenceNumber)) {
-                                    var remove = found[project.LoanReferenceNumber];
+                                    var remove = found[project_transaction.hash];
                                     if(remove.Item1)
                                         continue;
                                     backer_addressess.Remove(remove.Item2);
@@ -70,13 +70,13 @@ namespace blockchain_parser.Blockchain
                                 }
                                 var bid = CreateBid(project.LoanId, ref_id, reference.InvestorId, project_transaction, block_number);
                                 all_bids.Add(bid);
-                                found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(true, null, null);
+                                found[project_transaction.hash] = new Tuple<Boolean, String, LoanBids>(true, null, null);
                                 backers_counter++;
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
                                 SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value);
                             }
                         } 
-                    if(!ref_id.HasValue && !found.ContainsKey(project.LoanReferenceNumber)){
+                    if(!ref_id.HasValue && !found.ContainsKey(project_transaction.hash)){
                         var from_address = project_transaction.from.ToLower();
                         if(!no_backer_bids.ContainsKey(from_address))
                             no_backer_bids.Add(from_address, new List<LoanBids>());
@@ -85,7 +85,7 @@ namespace blockchain_parser.Blockchain
                         no_backer_bids[from_address].Add(item);
                         if(!backer_addressess.Contains(from_address))
                             backer_addressess.Add(from_address);
-                        found[project.LoanReferenceNumber] = new Tuple<Boolean, String, LoanBids>(false, from_address, item);
+                        found[project_transaction.hash] = new Tuple<Boolean, String, LoanBids>(false, from_address, item);
                         Print("potentially unidentified transaction: " + project_transaction.hash);
                     }
                 }
@@ -163,7 +163,8 @@ namespace blockchain_parser.Blockchain
                 return;
             }
 
-            Task.Factory.StartNew(() => {
+            Task.Run(() => {
+                try {
                 var emails = new EmailNotificationsHelper();
                 var backer_email = emails.GetEmailNotification(AppConfig.NotifyBackerEmailTemplate, backer.User.Language);
                 var caretor_email = emails.GetEmailNotification(AppConfig.NotifyCreatorEmailTemplate, creator.Language);
@@ -207,7 +208,10 @@ namespace blockchain_parser.Blockchain
                     Print("UNABLE TO SENT EMAIL  " + caretor_email.Subject + " TO " + creator.Email);
                  else
                     Print("Notification email " + caretor_email.Subject + " sent to " + creator.Email);
-            }, TaskCreationOptions.LongRunning);
+                } catch(Exception ex) {
+                    Logger.LogStatus(ConsoleColor.Red, ex.ToString());
+                }
+            });
         }
     }
     

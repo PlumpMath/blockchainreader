@@ -12,14 +12,15 @@ namespace blockchain_parser
     sealed class Start
     {
 
-        public static void Release(object release) {
-           /* Print(String.Format("Memory used before collection:       {0:N0} bytes", 
+        /* public static void Release(object release) {
+           Print(String.Format("Memory used before collection:       {0:N0} bytes", 
                 GC.GetTotalMemory(false)));
             GC.Collect();
             GC.SuppressFinalize(release);
             Print(String.Format("Memory used after full collection:   {0:N0} bytes", 
-                GC.GetTotalMemory(true))); */
-        }
+                GC.GetTotalMemory(true)));
+        } */
+
         public static string PrepareHex(string hex) {
             if(hex.StartsWith("0x"))
                 hex = hex.Remove(0,2);
@@ -61,7 +62,7 @@ namespace blockchain_parser
         private static void processTransactionsTo(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
              var backers_handler = new BackersHandler();
              backers_handler.processBackersFromTransactions(transactions, addresses, block_number);
-             Release(backers_handler);
+            // Release(backers_handler);
         }
 
         private static void processPastBlocks(string[] args) {
@@ -95,7 +96,7 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.4");
+           Print("*Blockchain Parser* version 0.1.1.5");
 
            processPastBlocks(args);
 

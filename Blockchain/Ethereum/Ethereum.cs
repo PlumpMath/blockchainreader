@@ -26,9 +26,9 @@ namespace blockchain_parser.Blockchain.Ethereum
                     return;
                 }
                 if(response != null && response.@params != null && response.@params.result != null)
-                    Task.Factory.StartNew(() => {
+                    Task.Run(() => {
                         block_result(response.@params.result);
-                    }, TaskCreationOptions.LongRunning);
+                    });
             };
 
             webSocket.onError = (error) => {
