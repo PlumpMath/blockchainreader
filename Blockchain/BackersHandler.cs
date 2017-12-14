@@ -61,7 +61,7 @@ namespace blockchain_parser.Blockchain
                         foreach(var reference in project.InvestorPaymentReferences)
                         {
                             if(reference.RefId == ref_id){
-                                if(found.ContainsKey(project.LoanReferenceNumber)) {
+                                if(found.ContainsKey(project_transaction.hash)) {
                                     var remove = found[project_transaction.hash];
                                     if(remove.Item1)
                                         continue;
