@@ -77,7 +77,7 @@ namespace blockchain_parser
                  var block_details = Ethereum.GetBlockDetails(block_hash);
                  var block_processor = new BlockProcessor();
                  block_processor.onTransactionsTo = processTransactionsTo;
-                 block_processor.processBlockDetails(block_details);
+                 block_processor.processBlockDetails(block_details, block_callback: false);
                }
            }
            else if(latest_block.HasValue) {
@@ -86,7 +86,7 @@ namespace blockchain_parser
                     PrePrint("recover block " + block_details.hash);
                     var block_processor = new BlockProcessor();
                     block_processor.onTransactionsTo = processTransactionsTo;
-                    block_processor.processBlockDetails(block_details);
+                    block_processor.processBlockDetails(block_details, block_callback: false);
                     latest_block++;
                     block_details = Ethereum.GetBlockDetails((ulong)latest_block.Value);
                 }
@@ -96,7 +96,7 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.5");
+           Print("*Blockchain Parser* version 0.1.1.6");
 
            processPastBlocks(args);
 
