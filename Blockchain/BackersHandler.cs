@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using blockchain_parser.Utils;
 using System.Threading;
+using blockchain_parser.Blockchain.Ethereum;
 
 namespace blockchain_parser.Blockchain
 {
@@ -15,6 +16,8 @@ namespace blockchain_parser.Blockchain
         public BackersHandler(){}
 
         public void processBackersFromTransactions(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
+            if(BlockProcessor.previousBlock > block_number)
+                return;
             var all_transactions = transactions.Values.ToList().SelectMany(x => x).ToList();
             Print("transactions: " + all_transactions.ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
             var projects_helper = new LoansHelper();

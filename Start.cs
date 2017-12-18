@@ -99,7 +99,7 @@ namespace blockchain_parser
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.7");
+           Print("*Blockchain Parser* version 0.1.1.8");
 
             if(processPastBlocks(args)) {
                 Ethereum.StartListenNewBlocks((new_block) => {

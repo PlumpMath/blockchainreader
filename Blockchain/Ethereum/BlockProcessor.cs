@@ -7,7 +7,7 @@ namespace blockchain_parser.Blockchain.Ethereum
 {
     public class BlockProcessor
     {
-        private static ulong previousBlock = 0;
+        public static ulong previousBlock = 0;
 
         public BlockProcessor() {
             onTransactionsTo = (transactions, addresses, block_number) => {
