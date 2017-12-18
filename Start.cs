@@ -65,7 +65,7 @@ namespace blockchain_parser
             // Release(backers_handler);
         }
 
-        private static void processPastBlocks(string[] args) {
+        private static bool processPastBlocks(string[] args) {
            var bids_helper = new LoanBidsHelper();
            var latest_block = bids_helper.getLatestBlock();
            
@@ -79,6 +79,7 @@ namespace blockchain_parser
                  block_processor.onTransactionsTo = processTransactionsTo;
                  block_processor.processBlockDetails(block_details, block_callback: false);
                }
+               return false;
            }
            else if(latest_block.HasValue) {
                 var block_details = Ethereum.GetBlockDetails((ulong)latest_block.Value);
@@ -92,22 +93,23 @@ namespace blockchain_parser
                 }
 		        PrePrint("recovering finished on block " + (latest_block-1));
             }
+
+            return true;
         }
 
         static void Main(string[] args)
         {
-           Print("*Blockchain Parser* version 0.1.1.6");
+           Print("*Blockchain Parser* version 0.1.1.7");
 
-           processPastBlocks(args);
-
-           Ethereum.StartListenNewBlocks((new_block) => {
-               Print("processing block " + new_block.hash);
-               var block_processor = new BlockProcessor();
-               block_processor.onTransactionsTo = processTransactionsTo;
-               block_processor.processBlock(new_block);
-           });
-
-            Print("Started service for " + AppConfig.WebsocketNodeUrl + " node listening...");
+            if(processPastBlocks(args)) {
+                Ethereum.StartListenNewBlocks((new_block) => {
+                    Print("processing block " + new_block.hash);
+                    var block_processor = new BlockProcessor();
+                    block_processor.onTransactionsTo = processTransactionsTo;
+                    block_processor.processBlock(new_block);
+                });
+                Print("Started service for " + AppConfig.WebsocketNodeUrl + " node listening...");
+            }
             while (true)
             {
                 Thread.Sleep(1000);
