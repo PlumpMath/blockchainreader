@@ -7,7 +7,8 @@ namespace blockchain_parser.Blockchain.Ethereum
 {
     public class BlockProcessor
     {
-        public static ulong previousBlock = 0;
+        private static ulong previousBlock = 0;
+        private static readonly object syncLock = new object();
 
         public BlockProcessor() {
             onTransactionsTo = (transactions, addresses, block_number) => {
@@ -59,21 +60,23 @@ namespace blockchain_parser.Blockchain.Ethereum
         }
 
         private void onBlock(ulong block_number) {
-            var passed = true;
-            for(ulong block = (previousBlock+1); block < block_number; block++) {
-                dynamic block_response = Ethereum.GetBlockDetails(block);
-                if(block_response != null){
-                    Print("recover block " + block_response.hash);
-                    processBlockDetails(block_response, block_callback: false);
+            lock(syncLock) { 
+                var passed = true;
+                for(ulong block = (previousBlock+1); block < block_number; block++) {
+                    dynamic block_response = Ethereum.GetBlockDetails(block);
+                    if(block_response != null){
+                        Print("recover block " + block_response.hash);
+                        processBlockDetails(block_response, block_callback: false);
+                    }
+                    else {
+                        Print("failed to recover block " + block);
+                        passed = false;
+                        break;
+                    }
                 }
-                else {
-                    Print("failed to recover block " + block);
-                    passed = false;
-                    break;
-                }
+                if(passed)
+                    previousBlock = block_number;
             }
-            if(passed)
-                previousBlock = block_number;
         }
 
         protected void processTransactions(JArray transactions, bool with_value, string block_hash, Action<ulong> on_block){
