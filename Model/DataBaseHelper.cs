@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
+using MySql.Data.MySqlClient;
 
 namespace blockchain_parser.Model
 {
@@ -130,6 +131,18 @@ namespace blockchain_parser.Model
 					{
 						save_failed = true;
 						ex.Entries.Single().Reload();
+					}
+					catch (DbUpdateException ex)
+					{
+						MySqlException innerException = ex.InnerException as MySqlException;
+    					if (innerException != null && innerException.Number == 1062)
+    					{
+        					Logger.LogStatus(ConsoleColor.Yellow, "DUPLICATE KEY WARNING: " + ((innerException == null) ? ex.ToString() : innerException.ToString())); 
+    					}
+    					else
+    					{
+        					throw ex;
+    					}
 					}
 					catch (Exception e)
 					{

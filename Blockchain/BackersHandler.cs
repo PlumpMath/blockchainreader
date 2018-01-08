@@ -18,7 +18,6 @@ namespace blockchain_parser.Blockchain
         public BackersHandler(){}
 
         public void processBackersFromTransactions(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
-            lock(syncLock) { 
             var all_transactions = transactions.Values.ToList().SelectMany(x => x).ToList();
             Print("transactions: " + all_transactions.ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
             var projects_helper = new LoansHelper();
@@ -45,7 +44,6 @@ namespace blockchain_parser.Blockchain
             bids_helper.PopulateBackersFundingTransactions(all_bids);
             Print("identified backer transactions: " + backers_counter + 
                 ", " + "unidentified backer transactions: " + (all_bids.Count - backers_counter));
-            }
         }
 
         private void Print(string message) {
