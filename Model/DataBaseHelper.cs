@@ -136,24 +136,27 @@ namespace blockchain_parser.Model
 					{
 						MySqlException innerException = ex.InnerException as MySqlException;
     					if (innerException != null && innerException.Number == 1062)
-    					{
-        					Logger.LogStatus(ConsoleColor.Yellow, "DUPLICATE KEY WARNING: " + ((innerException == null) ? ex.ToString() : innerException.ToString())); 
-    					}
+							message("DUPLICATE KEY WARNING: ", ConsoleColor.Yellow, ex);
     					else
-    					{
-        					Logger.LogStatus(ConsoleColor.Red, "DATABASE ERROR: " + ((innerException == null) ? ex.ToString() : innerException.ToString()));
-							Environment.Exit(1);
-    					}
+        					exit(ex);
 					}
 					catch (Exception e)
 					{
-						Logger.LogStatus(ConsoleColor.Red, "DATABASE ERROR: " + ((e.InnerException == null) ? e.ToString() : e.InnerException.ToString()));
-						Environment.Exit(1);
+						exit(e);
 					}
 
 				} while (save_failed);
 				return null;
 			}
+		}
+
+		private void exit(Exception e) {
+			message("DATABASE ERROR: ", ConsoleColor.Red, e);
+			Environment.Exit(1);
+		}
+
+		private void message(string message, ConsoleColor color, Exception e) {
+			Logger.LogStatus(color, message + ((e.InnerException == null) ? e.ToString() : e.InnerException.ToString()));
 		}
     }
 }
