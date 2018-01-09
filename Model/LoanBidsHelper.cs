@@ -14,8 +14,11 @@ namespace blockchain_parser.Model
                 return null;
             return bid.BlockNumber;
         }
-        public void PopulateBackersFundingTransactions(List<LoanBids> funding_transactions) {
-            Create(db => db.LoanBids, funding_transactions);
+        public bool PopulateBackersFundingTransactions(List<LoanBids> funding_transactions) {
+            var result = Create(db => db.LoanBids, funding_transactions);
+            if(result.HasValue && result.Value)
+                return true;
+            return false;
         }
 
         public void CreateOrUpdateLastBlock(LoanBids block_transactions) {

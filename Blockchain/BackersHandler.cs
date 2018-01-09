@@ -13,11 +13,19 @@ namespace blockchain_parser.Blockchain
 {
     public class BackersHandler
     {
+        private struct NotificationData {
+            public Loans Project {get; set;}
+            public Investors Backer {get; set;} 
+            public Users Creator {get; set;} 
+            public decimal Amount {get; set;}
+        }
+
         private static readonly object syncLock = new object();
 
         public BackersHandler(){}
 
         public void processBackersFromTransactions(Dictionary<string, List<Transaction>> transactions, HashSet<string> addresses, ulong block_number) {
+
             var all_transactions = transactions.Values.ToList().SelectMany(x => x).ToList();
             Print("transactions: " + all_transactions.ToList().Count + ", addresses: " + addresses.Count + ", block number: " + block_number);
             var projects_helper = new LoansHelper();
@@ -26,6 +34,7 @@ namespace blockchain_parser.Blockchain
             var no_backer_bids = new Dictionary<string, List<LoanBids>>();
             var backer_addressess = new HashSet<string>();
             var projects = projects_helper.FindProjects(addresses.ToList());
+            var notifications = new List<NotificationData>();
             int backers_counter = 0;
             if(projects == null || projects.Count == 0){
                 Print("no any backer transactions");
@@ -38,12 +47,18 @@ namespace blockchain_parser.Blockchain
 
             Print("found projects: " + projects.Count);
             processProjects(projects, transactions, all_bids, no_backer_bids, 
-                backer_addressess, block_number, ref backers_counter);
+                backer_addressess, notifications, block_number, ref backers_counter);
 
-            all_bids.AddRange (searchBackers(no_backer_bids, backer_addressess, ref backers_counter));
-            bids_helper.PopulateBackersFundingTransactions(all_bids);
+            all_bids.AddRange (searchBackers(no_backer_bids, backer_addressess, notifications, ref backers_counter));
+            if(bids_helper.PopulateBackersFundingTransactions(all_bids))
+                SendNotifications(notifications);
             Print("identified backer transactions: " + backers_counter + 
                 ", " + "unidentified backer transactions: " + (all_bids.Count - backers_counter));
+        }
+
+        private void SendNotifications(List<NotificationData> notifications) {
+            foreach(var notification in notifications)
+                SendEmailNotification(notification.Project, notification.Backer, notification.Creator, notification.Amount);
         }
 
         private void Print(string message) {
@@ -52,7 +67,7 @@ namespace blockchain_parser.Blockchain
 
         private void processProjects(List<Loans> projects, Dictionary<string, List<Transaction>> transactions,
             List<LoanBids> all_bids, Dictionary<string, List<LoanBids>> no_backer_bids, 
-            HashSet<string> backer_addressess, ulong block_number, ref int backers_counter) {
+            HashSet<string> backer_addressess, List<NotificationData> notifications, ulong block_number, ref int backers_counter) {
             var found =  new Dictionary<String, Tuple<Boolean, String, LoanBids>>();
 
             foreach(var project in projects) {
@@ -76,7 +91,12 @@ namespace blockchain_parser.Blockchain
                                 found[project_transaction.hash] = new Tuple<Boolean, String, LoanBids>(true, null, null);
                                 backers_counter++;
                                 Print("backer " + reference.InvestorId + " found for project: " + project.LoanId + ", transaction: " + project_transaction.hash);
-                                SendEmailNotification(project, reference.Investor, project.Creator.User, bid.BidAmount.Value);
+                                notifications.Add(new NotificationData {
+                                    Project = project,
+                                    Backer = reference.Investor,
+                                    Creator = project.Creator.User,
+                                    Amount = bid.BidAmount.Value
+                                });
                             }
                         } 
                     if(!ref_id.HasValue && !found.ContainsKey(project_transaction.hash)){
@@ -96,7 +116,7 @@ namespace blockchain_parser.Blockchain
         }
 
         private List<LoanBids> searchBackers(Dictionary<string, List<LoanBids>> no_backer_bids, HashSet<string> backer_addresses,
-
+            List<NotificationData> notifications,
             ref int backers_counter) {
             var backers_helper  = new InvestorsHelper();
             var backers = backers_helper.FindBackers(backer_addresses.ToList());
@@ -108,7 +128,12 @@ namespace blockchain_parser.Blockchain
                     bid.BidStatus = 1;
                     backers_counter++;
                     Print("backer " + bid.InvestorId + " found for project: " + bid.LoanId + ", transaction: " + bid.TransId);
-                    SendEmailNotification(bid.Project, backer, bid.Project.Creator.User, bid.BidAmount.Value);
+                    notifications.Add(new NotificationData {
+                                    Project = bid.Project,
+                                    Backer = backer,
+                                    Creator = bid.Project.Creator.User,
+                                    Amount = bid.BidAmount.Value
+                    });
                     bid.Project = null;
                 }
             }
